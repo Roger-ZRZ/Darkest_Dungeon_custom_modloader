@@ -1,6 +1,8 @@
 require 'json'
 require 'shellwords'
-require 'pathname'
+require 'pathname' 
+
+require_relative 'modloader-config'
 
 # README: 
 # Mods are loaded in alphabetical order, mod starting with least alphabetical rank will overwrite mods later in the rank. 
@@ -15,20 +17,12 @@ require 'pathname'
 # 2. run script;
 # 3. remove all folders and files in [game_backup_dir];
 
-# CONFIG
-
-game_name = "DarkestDungeon" # game name for identification
-call_time = `date +%Y-%m-%d-%H-%M-%S`.gsub("\n","")
-game_overwrite_dir = "~/localWorkspace/modloader test/Resources/Data" # dir to overwrite files to
-game_modsrc_dir = "~/localWorkspace/modloader test/modloader_srcdir"
-game_backup_dir = "~/localWorkspace/modloader test/ModdingBackup/#{game_name}/#{call_time}"
-game_mod_identifier = "**/*.*" # currently identifies all files with extensions to be replaced
 
 # CHECK
 
-game_overwrite_dir = File.expand_path (game_overwrite_dir)
-game_modsrc_dir = File.expand_path (game_modsrc_dir)
-game_backup_dir = File.expand_path (game_backup_dir)
+game_overwrite_dir = File.expand_path (GAME_OVERWRITE_DIR)
+game_modsrc_dir = File.expand_path (GAME_MODSRC_DIR)
+game_backup_dir = File.expand_path (GAME_BACKUP_DIR)
 
 if ( ! Dir.exist? game_overwrite_dir )
 	raise "game_overwrite_dir [#{game_overwrite_dir}] not present, abort"
@@ -47,7 +41,7 @@ conflict_file_list = Array[]
 mod_dir_list = `ls -d #{game_modsrc_dir.shellescape}/*/`.split("\n")
 
 (mod_dir_list).each do |this_mod_dir|
-	this_mod_files = Dir.glob("#{this_mod_dir}**/*.*")
+	this_mod_files = Dir.glob("#{this_mod_dir}#{GAME_MOD_IDENTIFIER}")
 
 	(this_mod_files).each do |faddr|
 		equiv_name_in_original = "#{game_overwrite_dir}/#{faddr.sub(this_mod_dir, "")}"
@@ -87,7 +81,7 @@ end
 
 # WRAP UP
 
-puts "\n\n\n\n\n"
+puts "\n\n=== DONE ===\n\n\n"
 
 puts "MOD FILE REPLACED:"
 puts replaced_files_list
@@ -99,4 +93,3 @@ puts "MOD FILE NOT REPLACED:"
 puts nonexist_files_list
 puts "\n\n"
 
-# puts Dir.glob("**/*")
